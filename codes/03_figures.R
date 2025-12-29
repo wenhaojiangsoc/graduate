@@ -1,25 +1,34 @@
 ## codes the replicate the figures that appear in the paper
+library(ggplot2)
+library(ggrepel)
 
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 ################# Figure 1 ##################
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 
-figure1 <- df %>%
-  mutate(is_M_egp=case_when(
-    occ2010>=10&occ2010<=430&is_PM_egp==2 ~ 1,
-    .default=0
-  ),
-  is_P_egp=case_when(
-    occ2010>430&is_PM_egp==2 ~ 1,
-    .default=0
-  )) %>%
+plot_data <- df %>%
+  mutate(
+    is_M_egp = case_when(
+      occ2010 >= 10 & occ2010 <= 430 & is_PM_egp == 2 ~ 1,
+      TRUE ~ 0
+    ),
+    is_P_egp = case_when(
+      occ2010 > 430 & is_PM_egp == 2 ~ 1,
+      TRUE ~ 0
+    )
+  ) %>%
   group_by(year) %>%
-  summarize(prop_M=sum(weight[is_M_egp==1])/sum(weight),
-            se_M = sqrt(sum((weight^2) * ((is_M_egp - sum(weight[is_M_egp == 1], na.rm = TRUE) / sum(weight, na.rm = TRUE))^2), na.rm = TRUE)) / sum(weight, na.rm = TRUE),
-            prop_P=sum(weight[is_P_egp==1])/sum(weight),
-            se_P = sqrt(sum((weight^2) * ((is_P_egp - sum(weight[is_P_egp == 1], na.rm = TRUE) / sum(weight, na.rm = TRUE))^2), na.rm = TRUE)) / sum(weight, na.rm = TRUE)) %>%
-  filter(year>=1980) %>%
-  ggplot(aes(x = year)) +
+  summarize(
+    prop_M = sum(weight[is_M_egp == 1]) / sum(weight),
+    se_M   = sqrt(sum(weight^2 * (is_M_egp - prop_M)^2)) / sum(weight),
+    prop_P = sum(weight[is_P_egp == 1]) / sum(weight),
+    se_P   = sqrt(sum(weight^2 * (is_P_egp - prop_P)^2)) / sum(weight),
+    .groups = "drop"
+  ) %>%
+  filter(year >= 1980)
+
+
+figure1 <- ggplot(plot_data, aes(x = year)) +
   geom_line(aes(y = prop_M, color = "management"),size=0.6) +
   geom_ribbon(aes(ymin = prop_M - 4.4172 * se_M, ymax = prop_M + 4.4172 * se_M, fill = "management"), alpha = 0.2) +
   geom_line(aes(y = prop_P, color = "professional")) +
@@ -27,12 +36,42 @@ figure1 <- df %>%
   scale_color_manual(name = "", values = c("management" = "blue", "professional" = "red")) +
   scale_fill_manual(name = "", values = c("management" = "blue", "professional" = "red")) +
   labs(x = "year", y = "proportion of workforce", title = "Panel A") +
+  geom_text_repel(
+    data = plot_data,
+    inherit.aes = FALSE,
+    aes(x = year, y = prop_M, label = sprintf("%.3f", prop_M)),
+    nudge_y = 0.015,
+    direction = "y",
+    box.padding = 0.35,
+    point.padding = 0.6, 
+    segment.size = 0.25,
+    segment.color = "gray50",
+    force = 12,
+    size = 3,
+    color = "blue",
+    show.legend = FALSE
+  ) +
+  geom_text_repel(
+    data = plot_data,
+    inherit.aes = FALSE,
+    aes(x = year, y = prop_P, label = sprintf("%.3f", prop_P)),
+    nudge_y = -0.015, 
+    direction = "y",
+    box.padding = 0.35,
+    point.padding = 0.6,
+    segment.size = 0.25,
+    segment.color = "gray50",
+    force = 12,
+    size = 3,
+    color = "red",
+    show.legend = FALSE
+  ) +
   theme_bw() +
   theme(legend.position = "bottom",
         legend.text = element_text(size=10.5),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_blank(),
-        plot.title = element_text(hjust = 0.5, size=12))
+        plot.title = element_text(hjust = 0.5, size=12, color="white"))
 
 ## read education data for the US
 usedu <- read.csv("data/raw/us_education.csv") %>%
@@ -64,11 +103,18 @@ figure2 <- usedu %>%
         legend.text = element_text(size=10.5),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_blank(),
-        plot.title = element_text(hjust = 0.5, size=12))
+        plot.title = element_text(hjust = 0.5, size=12, color="white"))
 library(ggpubr)
 ggarrange(figure1,figure2)
 ggsave("figures/figure1_degree_number.tiff",
        width = 21.6, height = 10.5, units = "cm", dpi = 300)
+
+figure1
+ggsave("figures/figure1_panelA.tiff",
+       width = 10.8, height = 10.5, units = "cm", dpi = 300)
+figure2
+ggsave("figures/figure1_panelB.tiff",
+       width = 10.8, height = 10.5, units = "cm", dpi = 300)
 
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 ################# Figure 2 ##################
@@ -104,6 +150,19 @@ df_summary %>%
   scale_fill_manual(
     values = c("NPM" = "blue", "PM" = "red"),
     name = "") +
+  geom_text_repel(
+    aes(x = year, y = income_pce_cap, label = sprintf("%.2f", income_pce_cap), color = is_PM_egp),
+    nudge_y = 0.02, 
+    direction = "y",
+    box.padding = 0.35,
+    point.padding = 0.6,
+    segment.size = 0.25,
+    segment.color = "gray50",
+    force = 12,
+    size = 3,
+    show.legend = FALSE,
+    max.overlaps = Inf
+  ) +
   theme(legend.position = "bottom",
         legend.text = element_text(size=10.5),
         panel.grid.minor.x = element_blank(),
@@ -151,6 +210,19 @@ df_summary %>%
   scale_fill_manual(
     values = c("Less than BA/BS" = "blue", "BA/BS" = "green3", "Graduate" = "red"),
     name = "") +
+  geom_text_repel(
+    aes(x = year, y = income_pce_cap, label = sprintf("%.2f", income_pce_cap), color = edu_attain_3cat),
+    nudge_y = 0.02, 
+    direction = "y",
+    box.padding = 0.35,
+    point.padding = 0.6,
+    segment.size = 0.25,
+    segment.color = "gray50",
+    force = 12,
+    size = 3,
+    show.legend = FALSE,
+    max.overlaps = Inf
+  ) +
   theme(legend.position = "bottom",
         legend.text = element_text(size=10.5),
         panel.grid.minor.x = element_blank(),
@@ -211,6 +283,12 @@ prop %>%
   xlab("") +
   xlim(1977,2023) +
   theme_bw() +
+  geom_text_repel(
+    aes(label = sprintf("%.3f", value), color = factor(PM)),
+    size = 3,
+    show.legend = FALSE,
+    max.overlaps = Inf
+  ) +
   theme(text = element_text(family="Times"),
         legend.position="bottom",
         plot.title = element_text(size=11),
@@ -228,7 +306,7 @@ prop %>%
   guides(colour = guide_legend(override.aes = list(linewidth = 0.8, size = 2)))
 
 ## save
-ggsave("figures/figure4_composition_edu.png", width = 13, height = 9, units = "cm")
+ggsave("figures/figure4_composition_edu.png", width = 15, height = 10, units = "cm")
 
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 ################# Figure 5 ##################
@@ -306,6 +384,12 @@ result %>%
   xlab("") +
   xlim(1977,2023) +
   theme_bw() +
+  geom_text_repel(
+    aes(label = sprintf("%.3f", coef), color = factor(PM)),
+    size = 3,
+    show.legend = FALSE,
+    max.overlaps = Inf
+  ) +
   theme(text = element_text(family="Times"),
         legend.position="bottom",
         plot.title = element_text(size=11),
