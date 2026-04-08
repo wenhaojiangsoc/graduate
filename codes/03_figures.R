@@ -30,9 +30,7 @@ plot_data <- df %>%
 
 figure1 <- ggplot(plot_data, aes(x = year)) +
   geom_line(aes(y = prop_M, color = "management"),size=0.6) +
-  geom_ribbon(aes(ymin = prop_M - 4.4172 * se_M, ymax = prop_M + 4.4172 * se_M, fill = "management"), alpha = 0.2) +
   geom_line(aes(y = prop_P, color = "professional")) +
-  geom_ribbon(aes(ymin = prop_P - 4.4172 * se_P, ymax = prop_P + 4.4172 * se_P, fill = "professional"), alpha = 0.2) +
   scale_color_manual(name = "", values = c("management" = "blue", "professional" = "red")) +
   scale_fill_manual(name = "", values = c("management" = "blue", "professional" = "red")) +
   labs(x = "year", y = "proportion of workforce", title = "Panel A") +
@@ -106,8 +104,8 @@ figure2 <- usedu %>%
         plot.title = element_text(hjust = 0.5, size=12, color="white"))
 library(ggpubr)
 ggarrange(figure1,figure2)
-ggsave("figures/figure1_degree_number.tiff",
-       width = 21.6, height = 10.5, units = "cm", dpi = 300)
+ggsave("figures/figure1_degree_number.png",
+       width = 21.6, height = 10.5, units = "cm", dpi = 500)
 
 figure1
 ggsave("figures/figure1_panelA.tiff",
@@ -139,11 +137,9 @@ df_summary %>%
   )) %>%
   ggplot(aes(x = year, group=is_PM_egp)) +
   geom_line(aes(y = income_pce_cap, color = is_PM_egp),size=0.6) +
-  geom_ribbon(aes(ymin = income_pce_cap - 6.4172 * se, 
-                  ymax = income_pce_cap + 6.4172 * se, fill = is_PM_egp), alpha = 0.2) +
   labs(x = "", y = "wages in 2019 USD", title = "") +
   theme_bw() +
-  facet_grid(~sex, labeller = labeller(sex = c(`1` = "Male", `2` = "Female"))) +
+  facet_grid(~sex, labeller = labeller(sex = c(`1` = "Men", `2` = "Women"))) +
   scale_color_manual(
     values = c("NPM" = "blue", "PM" = "red"),
     name = "") +
@@ -172,8 +168,8 @@ df_summary %>%
         axis.title.x = element_blank(),
         strip.text = element_text(size = 11),
         panel.spacing = unit(2, "lines"))
-ggsave("figures/figure2_PMwages.tiff",
-       width = 19.6, height = 10, units = "cm", dpi = 300)
+ggsave("figures/figure2_PMwages.png",
+       width = 19.6, height = 10, units = "cm", dpi = 500)
 
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 ################# Figure 3 ##################
@@ -199,11 +195,9 @@ df_summary %>%
   )) %>%
   ggplot(aes(x = year, group=edu_attain_3cat)) +
   geom_line(aes(y = income_pce_cap, color = edu_attain_3cat),size=0.6) +
-  geom_ribbon(aes(ymin = income_pce_cap - 4.4172 * se, 
-                  ymax = income_pce_cap + 4.4172 * se, fill = edu_attain_3cat), alpha = 0.2) +
   labs(x = "", y = "wages in 2019 USD", title = "") +
   theme_bw() +
-  facet_grid(~sex, labeller = labeller(sex = c(`1` = "Male", `2` = "Female"))) +
+  facet_grid(~sex, labeller = labeller(sex = c(`1` = "Men", `2` = "Women"))) +
   scale_color_manual(
     values = c("Less than BA/BS" = "blue", "BA/BS" = "green3", "Graduate" = "red"),
     name = "") +
@@ -232,8 +226,8 @@ df_summary %>%
         axis.title.x = element_blank(),
         strip.text = element_text(size = 11),
         panel.spacing = unit(2, "lines"))
-ggsave("figures/figure3_graduate_wages.tiff",
-       width = 19.6, height = 10, units = "cm", dpi = 300)
+ggsave("figures/figure3_graduate_wages.png",
+       width = 19.6, height = 10, units = "cm", dpi = 500)
 
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 ################# Figure 4 ##################
@@ -286,27 +280,25 @@ prop %>%
   geom_text_repel(
     aes(label = sprintf("%.3f", value), color = factor(PM)),
     size = 3,
+    force = 12,
     show.legend = FALSE,
     max.overlaps = Inf
   ) +
-  theme(text = element_text(family="Times"),
-        legend.position="bottom",
-        plot.title = element_text(size=11),
+  theme(legend.position="bottom",
+        legend.text = element_text(size=10.5),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_blank(),
         axis.line = element_blank(),
-        strip.text.x = element_text(size = 14, colour = "black", face="bold"),
+        strip.text.x = element_text(size = 11, colour = "black"),
         panel.border = element_rect(colour = "black", fill = NA, linewidth=0.6),
-        axis.text.y = element_text(size=10, angle=90, hjust=0.5),
-        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(angle=90, hjust=0.5),
         axis.title.x = element_blank(),
-        axis.title=element_text(size=14,hjust=0.5),
-        legend.text = element_text(size=14),
-        legend.title = element_text(size=14)) + 
-  guides(colour = guide_legend(override.aes = list(linewidth = 0.8, size = 2)))
+        axis.title=element_text(hjust=0.5),
+        legend.title = element_text(size=14))
 
 ## save
-ggsave("figures/figure4_composition_edu.png", width = 15, height = 10, units = "cm")
+ggsave("figures/figure4_composition_edu.png",
+       width = 19.6, height = 10, units = "cm", dpi = 500)
 
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
 ################# Figure 5 ##################
@@ -388,27 +380,26 @@ result %>%
     aes(label = sprintf("%.3f", coef), color = factor(PM)),
     size = 3,
     show.legend = FALSE,
-    max.overlaps = Inf
+    max.overlaps = 10,
+    force = 13,
+    box.padding = 0.42,    # default ~0.25
+    point.padding = 0.2
   ) +
-  theme(text = element_text(family="Times"),
-        legend.position="bottom",
-        plot.title = element_text(size=11),
+  theme(legend.position="bottom",
+        legend.text = element_text(size=10.5),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_blank(),
         axis.line = element_blank(),
-        strip.text.x = element_text(size = 14, colour = "black", face="bold"),
+        strip.text.x = element_text(size = 11, colour = "black"),
         panel.border = element_rect(colour = "black", fill = NA, linewidth=0.6),
-        axis.text.y = element_text(size=10, angle=90, hjust=0.5),
-        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(angle=90, hjust=0.5),
         axis.title.x = element_blank(),
-        axis.title=element_text(size=14,hjust=0.5),
-        legend.text = element_text(size=14),
-        legend.title = element_text(size=14)) + 
-  guides(colour = guide_legend(override.aes = list(linewidth = 0.8, size = 2)))
+        axis.title=element_text(hjust=0.5),
+        legend.title = element_text(size=14))
 
 ## save results
 ggsave("figures/figure5_return_edu_normalized.png", 
-       width = 13, height = 9, units = "cm")
+       width = 19.6, height = 10, units = "cm", dpi=500)
 
 #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~
 ################# Figure 6 Predicting PM Occupations ###############
@@ -499,21 +490,17 @@ results_detailed %>%
                "BA/BS"  = "green3",
                "graduate" = "red")
   ) +
-  theme(text = element_text(family="Times"),
-        legend.position="bottom",
-        plot.title = element_text(size=11),
+  theme(legend.position="bottom",
+        legend.text = element_text(size=10.5),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_blank(),
         axis.line = element_blank(),
-        strip.text.x = element_text(size = 14, colour = "black", face="bold"),
+        strip.text.x = element_text(size = 11, colour = "black"),
         panel.border = element_rect(colour = "black", fill = NA, linewidth=0.6),
-        axis.text.y = element_text(size=10, angle=90, hjust=0.5),
-        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(angle=90, hjust=0.5),
         axis.title.x = element_blank(),
-        axis.title=element_text(size=14,hjust=0.5),
-        legend.text = element_text(size=14),
-        legend.title = element_text(size=14)) + 
-  guides(colour = guide_legend(override.aes = list(linewidth = 0.8, size = 2))) +
+        axis.title=element_text(hjust=0.5),
+        legend.title = element_text(size=14)) +
   labs(
     color = "",
     x = "",
@@ -523,7 +510,7 @@ results_detailed %>%
   xlim(1979,2021)
 
 ggsave("figures/figure6_predictedprob.png",
-       width = 15, height = 10, units = "cm", dpi = 300)
+       width = 19.6, height = 10, units = "cm", dpi = 500)
 
 ## print out and summarise results in a table in Appendix
 s <- summary(model)

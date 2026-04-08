@@ -5,7 +5,6 @@ setwd("/Users/wj93/Library/CloudStorage/Dropbox/RA Paula/git replication")
 source("codes/01_weighted_kim_function.R")
 
 ## import dataset
-df <- read_dta("/Users/wj93/Library/CloudStorage/Dropbox/RA Paula/R&R/Codes/00_cleaned/master_1_01.dta")
 df <- read_dta("data/processed/master_1_01.dta")
 
 ## dummy potential years of experience
